@@ -11,14 +11,15 @@
 
 #include "spatial.h"
 #include "simple_knn.h"
+#include <cuda_runtime.h>
 
 torch::Tensor
 distCUDA2(const torch::Tensor& points)
 {
+  cudaSetDevice(points.device().index());
   const int P = points.size(0);
 
-  auto float_opts = points.options().dtype(torch::kFloat32);
-  torch::Tensor means = torch::full({P}, 0.0, float_opts);
+  torch::Tensor means = torch::full({P}, 0.0, points.options().dtype(torch::kFloat32));  
   
   SimpleKNN::knn(P, (float3*)points.contiguous().data<float>(), means.contiguous().data<float>());
 
